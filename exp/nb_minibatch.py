@@ -4,6 +4,26 @@
 #################################################
 # file to edit: dev_nb/minibatch_training.ipynb
 
+def accuracy(out, yb): return (out.argmax(-1) == yb).float().mean()
+
+class Dataset():
+    def __init__(self, x, y): self.x, self.y= x,y
+    def __len__(self): return len(self.x)
+    def __getitem__(self, i): return self.x[i], self.y[i]
+
+class Sampler():
+    def __init__(self, ds, bs, shuffle=False):
+        self.n,self.bs,self.shuffle = len(ds), bs, shuffle
+    def __iter__(self):
+        self.idxs = torch.randperm(self.n) if self.shuffle else torch.arange(self.n)
+        for i in range(0, self.n, self.bs): yield self.idxs[i:i+self.bs]
+
+class DataLoader():
+    def __init__(self, ds, s): self.ds, self.s = ds,s
+    def __iter__(self):
+        for idxs in self.s:
+            yield self.ds[idxs]
+
 from torch.utils.data import DataLoader, SequentialSampler, RandomSampler
 
 def get_dls(train_ds, valid_ds, bs, **kwargs):
